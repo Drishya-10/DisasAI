@@ -1,0 +1,80 @@
+[
+  {
+    "id": "patna_flood_hi",
+    "title": "Patna Urban Flood - 7 Trapped (Hindi)",
+    "language_code": "hi",
+    "language_name": "Hindi (हिन्दी)",
+    "emergency_type": "FLOOD",
+    "severity": "CRITICAL",
+    "text_native": "अरे कोई बचाओ! पटना के राजेंद्र नगर में भारी बाढ़ आ गई है। पानी पहली मंजिल तक घुस गया है। हमारे घर में सात लोग फंसे हैं, दो बुजुर्ग बीमार हैं और एक बच्चा है। बिजली कट गई है, पानी तेजी से बढ़ रहा है! तुरंत बोट और एनडीआरएफ टीम भेजिए!",
+    "text_english": "Please save us! A massive flood has hit Rajendra Nagar, Patna. Water has entered the first floor. Seven people are trapped in our house, including two sick elderly individuals and one child. Power is cut, water is rising rapidly! Send rescue boats and the NDRF team immediately!",
+    "noise_type": "flood_rain_thunder",
+    "audio_filename": "patna_flood_hi.wav",
+    "audio_url": "/api/audio/sample/patna_flood_hi.wav"
+  },
+  {
+    "id": "chennai_fire_ta",
+    "title": "Chennai Hospital Fire - 6 Trapped (Tamil)",
+    "language_code": "ta",
+    "language_name": "Tamil (தமிழ்)",
+    "emergency_type": "FIRE",
+    "severity": "CRITICAL",
+    "text_native": "ஹலோ அவசர உதவி! சென்னை அண்ணா நகரில் உள்ள மூன்று மாடி மருத்துவமனையில் திடீரென பயங்கர தீ விபத்து ஏற்பட்டுள்ளது! இரண்டாவது தளத்தில் நான்கு நோயாளிகள் மற்றும் இரண்டு செவிலியர்கள் சிக்கியுள்ளனர்! கடும் புகை மூட்டம், தயவுசெய்து உடனே தீயணைப்பு வாகனங்களை அனுப்புங்கள்!",
+    "text_english": "Emergency help! A massive fire has suddenly broke out in a three-storey hospital in Anna Nagar, Chennai! Four patients and two nurses are trapped on the second floor! Heavy dense smoke, please dispatch fire tenders immediately!",
+    "noise_type": "fire_siren_crackle",
+    "audio_filename": "chennai_fire_ta.wav",
+    "audio_url": "/api/audio/sample/chennai_fire_ta.wav"
+  },
+  {
+    "id": "vijayawada_accident_te",
+    "title": "Highway 16 Bus Crash - 8 Injured (Telugu)",
+    "language_code": "te",
+    "language_name": "Telugu (తెలుగు)",
+    "emergency_type": "ROAD_ACCIDENT",
+    "severity": "HIGH",
+    "text_native": "అర్జెంట్ హెల్ప్ కావాలి! విజయవాడ జాతీయ రహదారి 16 పై ఘోర రోడ్డు ప్రమాదం జరిగింది. ఒక బస్సు మరియు లారీ ఢీకొన్నాయి. కనీసం ఎనిమిది మంది తీవ్రంగా గాయపడ్డారు, డ్రైవర్ స్టీరింగ్ లో ఇరుక్కుపోయాడు! వెంటనే నాలుగు అంబులెన్సులు, రెస్క్యూ టీమ్ పంపించండి!",
+    "text_english": "Urgent help needed! A fatal road accident took place on National Highway 16, Vijayawada. A bus and truck collided. At least eight people are critically injured, the driver is trapped in the steering wheel! Send four ambulances and a rescue team immediately!",
+    "noise_type": "highway_traffic_crash",
+    "audio_filename": "vijayawada_accident_te.wav",
+    "audio_url": "/api/audio/sample/vijayawada_accident_te.wav"
+  },
+  {
+    "id": "bangalore_collapse_kn",
+    "title": "Bangalore Structural Collapse - 5 Trapped (Kannada)",
+    "language_code": "kn",
+    "language_name": "Kannada (ಕನ್ನಡ)",
+    "emergency_type": "BUILDING_COLLAPSE",
+    "severity": "CRITICAL",
+    "text_native": "ದಯವಿಟ್ಟು ಬೇಗ ಬನ್ನಿ! ಬೆಂಗಳೂರಿನ ಎಲೆಕ್ಟ್ರಾನಿಕ್ ಸಿಟಿ ಹತ್ತಿರ ನಿರ್ಮಾಣ ಹಂತದಲ್ಲಿದ್ದ ಕಟ್ಟಡ ಕುಸಿದು ಬಿದ್ದಿದೆ! ಅವಶೇಷಗಳ ಅಡಿಯಲ್ಲಿ ಸುಮಾರು ಐದು ಮಂದಿ ಕಾರ್ಮಿಕರು ಸಿಲುಕಿಕೊಂಡಿದ್ದಾರೆ! ತಕ್ಷಣ ಕ್ರೇನ್ ಮತ್ತು ರಕ್ಷಣಾ ತಂಡವನ್ನು ಕಳುಹಿಸಿ!",
+    "text_english": "Please come quickly! An under-construction building collapsed near Electronic City, Bangalore! Approximately five workers are trapped under the debris! Immediately send cranes and urban search and rescue team!",
+    "noise_type": "rumble_debris_shatter",
+    "audio_filename": "bangalore_collapse_kn.wav",
+    "audio_url": "/api/audio/sample/bangalore_collapse_kn.wav"
+  },
+  {
+    "id": "howrah_gas_leak_bn",
+    "title": "Howrah Chemical Cylinder Blast - 6 Trapped (Bengali)",
+    "language_code": "bn",
+    "language_name": "Bengali (বাংলা)",
+    "emergency_type": "GAS_LEAK",
+    "severity": "CRITICAL",
+    "text_native": "জরুরি সাহায্য চাই! হাওড়ার একটি রাসায়নিক কারখানায় ভয়াবহ গ্যাস সিলিন্ডার বিস্ফোরণ হয়েছে এবং আগুন লেগেছে! অন্তত ছয়জন কর্মী ভিতরে আটকা পড়ে আছেন, বিষাক্ত ধোঁয়া ছড়াচ্ছে! অবিলম্বে ফায়ার ব্রিগেড ও অ্যাম্বুলেন্স পাঠান!",
+    "text_english": "Emergency help needed! A severe gas cylinder explosion and fire occurred at a chemical factory in Howrah! At least six workers are trapped inside, toxic smoke is spreading! Dispatch fire brigades and ambulances immediately!",
+    "noise_type": "industrial_hiss_alarm",
+    "audio_filename": "howrah_gas_leak_bn.wav",
+    "audio_url": "/api/audio/sample/howrah_gas_leak_bn.wav"
+  },
+  {
+    "id": "delhi_commercial_collapse_en",
+    "title": "Noida Sector 18 Complex Collapse (English)",
+    "language_code": "en",
+    "language_name": "English (Indian)",
+    "emergency_type": "BUILDING_COLLAPSE",
+    "severity": "CRITICAL",
+    "text_native": "Emergency! Major structural collapse reported at Sector 18 Commercial Complex. At least five civilians are trapped under the concrete slabs on the ground floor. Two are bleeding heavily. We need USAR heavy extrication tools and trauma ambulances immediately!",
+    "text_english": "Emergency! Major structural collapse reported at Sector 18 Commercial Complex. At least five civilians are trapped under the concrete slabs on the ground floor. Two are bleeding heavily. We need USAR heavy extrication tools and trauma ambulances immediately!",
+    "noise_type": "siren_screams_dust",
+    "audio_filename": "delhi_commercial_collapse_en.wav",
+    "audio_url": "/api/audio/sample/delhi_commercial_collapse_en.wav"
+  }
+]

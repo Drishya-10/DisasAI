@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Emergency AI Dispatch System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css"/>
+<style>
+  /* Extra inline overrides for right-panel layout */
+  .right-panel > .card:first-child { margin-bottom: 0; }
+  .pipeline-stage-row { display: flex; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 6px; background: rgba(255,255,255,0.025); border: 1px solid transparent; transition: all 0.3s; }
+  .pipeline-stage-row.active { border-color: var(--cyan-primary); background: rgba(0,240,255,0.06); }
+  .pipeline-stage-row.done { border-color: var(--green-dispatch); background: rgba(0,230,118,0.05); }
+  .pipeline-stage-icon { font-size: 16px; width: 28px; text-align: center; }
+  .pipeline-stage-info { flex: 1; }
+  .pipeline-stage-name { font-size: 13px; font-weight: 600; }
+  .pipeline-stage-desc { font-size: 11px; color: var(--text-secondary); }
+  .pipeline-stage-status { font-size: 11px; font-family: var(--font-mono); }
+  .pipeline-stage-status.waiting { color: var(--text-muted); }
+  .pipeline-stage-status.running { color: var(--cyan-primary); }
+  .pipeline-stage-status.done { color: var(--green-dispatch); }
+  .severity-bar { height: 8px; border-radius: 4px; background: #1a2234; overflow: hidden; margin-top: 6px; }
+  .severity-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+  .lang-detect-chip { font-size: 11px; font-family: var(--font-mono); padding: 3px 8px; border-radius: 4px; background: rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.4); color: #d8b4fe; }
+  .protocols-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .protocols-list li { font-size: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.025); border-radius: 6px; padding: 8px 12px; border-left: 2px solid var(--cyan-primary); }
+  .summary-box { background: rgba(0,240,255,0.06); border: 1px solid rgba(0,240,255,0.2); border-radius: 8px; padding: 12px 14px; font-size: 13px; line-height: 1.65; color: #e2e8f0; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- ========= HEADER ========= -->
+<header class="app-header">
+  <div class="header-container">
+    <div class="brand-section">
+      <div class="brand-badge">🚨 DISPATCH</div>
+      <div class="brand-title">
+        <h1>Emergency AI Command &amp; Dispatch System <span style="font-size:12px;font-weight:400;color:var(--text-secondary);font-family:var(--font-mono);margin-left:6px;">v2.0</span></h1>
+        <p>Noisy Audio → Denoiser → Gnani ASR → Translation → LLM Intelligence → Tactical Dispatch → Operator Confirmation</p>
+      </div>
+    </div>
+    <div class="hud-telemetry">
+      <div class="telemetry-item"><span class="pulse-dot"></span> <strong id="hud-time">--:--:--</strong> IST</div>
+      <div class="telemetry-item">📡 Gnani ASR <strong style="color:var(--green-dispatch)">LIVE</strong></div>
+      <div class="telemetry-item">⚡ Pipeline <strong>READY</strong></div>
+      <button class="btn-header" onclick="loadIncidentLog()">📋 Incident Log</button>
+      <button class="btn-header" onclick="document.getElementById('api-modal').classList.add('active')">🔑 API Keys</button>
+    </div>
+  </div>
+</header>
+
+<!-- ========= PIPELINE STEPPER ========= -->
+<div class="pipeline-bar-wrapper">
+  <div class="pipeline-stepper">
+    <div class="pipe-step" id="pstep-0"><div class="pipe-step-num">1</div>Noisy Call</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-1"><div class="pipe-step-num">2</div>Denoiser</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-2"><div class="pipe-step-num">3</div>Gnani ASR</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-3"><div class="pipe-step-num">4</div>Translation</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-4"><div class="pipe-step-num">5</div>LLM Analysis</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-5"><div class="pipe-step-num">6</div>Dispatch Logic</div>
+    <div class="pipe-arrow">▶</div>
+    <div class="pipe-step" id="pstep-6"><div class="pipe-step-num">7</div>Operator Confirm</div>
+  </div>
+</div>
+
+<!-- ========= MAIN GRID ========= -->
+<div class="main-container">
+
+  <!-- LEFT PANEL: Ingestion + Controls -->
+  <div class="left-panel">
+
+    <!-- Scenario Selector -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🎙️</span> Emergency Call Ingestion</div>
+        <span class="card-badge">STAGE 1</span>
+      </div>
+
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Select a preset emergency scenario or upload/record your own noisy call audio.</p>
+
+      <div class="scenario-selector-grid" id="scenario-grid">
+        <!-- Loaded dynamically -->
+        <div style="color:var(--text-muted);font-size:12px;grid-column:span 2;text-align:center;padding:16px;">Loading scenarios…</div>
+      </div>
+
+      <!-- OR: Upload / Record -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="flex:1;height:1px;background:var(--border-color)"></div>
+        <span style="font-size:11px;color:var(--text-muted)">OR</span>
+        <div style="flex:1;height:1px;background:var(--border-color)"></div>
+      </div>
+
+      <div class="ingest-options">
+        <button class="btn-ingest" id="btn-record" onclick="toggleRecording()">
+          🎤 Record Live Call
+        </button>
+        <label class="btn-ingest" style="cursor:pointer;">
+          📂 Upload Audio
+          <input type="file" id="audio-file-input" accept="audio/*,.wav,.mp3,.ogg,.webm,.m4a" style="display:none" onchange="onFileUpload(this)"/>
+        </label>
+      </div>
+
+      <div id="upload-status" style="font-size:12px;color:var(--cyan-primary);display:none;padding:6px 10px;background:rgba(0,240,255,0.06);border-radius:6px;"></div>
+    </div>
+
+    <!-- Language & Denoiser Config -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🔊</span> Denoiser Pipeline Config</div>
+        <span class="card-badge">STAGE 2</span>
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text-secondary);font-weight:600;display:block;margin-bottom:6px;">Language Hint (for Gnani ASR)</label>
+        <select id="lang-select" class="form-select" style="width:100%">
+          <option value="auto">🔍 Auto-Detect</option>
+          <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+          <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
+          <option value="te">🇮🇳 Telugu (తెలుగు)</option>
+          <option value="kn">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+          <option value="bn">🇮🇳 Bengali (বাংলা)</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+
+      <div class="filter-toggles-card">
+        <div class="filter-toggle-row">
+          <div class="filter-info">
+            <div class="filter-name">🎚️ Butterworth Bandpass Filter</div>
+            <div class="filter-desc">Removes subsonic rumble & ultrasonic interference (100Hz–3800Hz)</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="toggle-butterworth" checked><span class="slider"></span></label>
+        </div>
+        <div class="filter-toggle-row">
+          <div class="filter-info">
+            <div class="filter-name">📉 Spectral Gating (Noise Floor)</div>
+            <div class="filter-desc">Dynamic noise floor tracking & spectral subtraction</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="toggle-spectral" checked><span class="slider"></span></label>
+        </div>
+        <div class="filter-toggle-row">
+          <div class="filter-info">
+            <div class="filter-name">🧠 GRU Neural Enhancer</div>
+            <div class="filter-desc">Recurrent deep learning speech formant reinforcement</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="toggle-gru" checked><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <button class="btn-process" id="btn-process" onclick="processCall()" disabled>
+        ⚡ Process Emergency Call
+      </button>
+    </div>
+
+    <!-- Live Pipeline Status -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">⚙️</span> Pipeline Execution Status</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;" id="pipeline-status-list">
+        <div class="pipeline-stage-row" id="ps-1"><div class="pipeline-stage-icon">🎙️</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Noisy Call Ingestion</div><div class="pipeline-stage-desc">Load audio from scenario or upload</div></div><div class="pipeline-stage-status waiting" id="pss-1">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-2"><div class="pipeline-stage-icon">🔊</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Denoiser Pipeline</div><div class="pipeline-stage-desc">Butterworth → Spectral Gating → GRU</div></div><div class="pipeline-stage-status waiting" id="pss-2">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-3"><div class="pipeline-stage-icon">🗣️</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Gnani ASR</div><div class="pipeline-stage-desc">Native speech → native language text</div></div><div class="pipeline-stage-status waiting" id="pss-3">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-4"><div class="pipeline-stage-icon">🌐</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Translation Engine</div><div class="pipeline-stage-desc">Native text → English text</div></div><div class="pipeline-stage-status waiting" id="pss-4">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-5"><div class="pipeline-stage-icon">🤖</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">LLM Intelligence</div><div class="pipeline-stage-desc">Classify · Severity · Extract · JSON</div></div><div class="pipeline-stage-status waiting" id="pss-5">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-6"><div class="pipeline-stage-icon">🚒</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Dispatch Logic</div><div class="pipeline-stage-desc">Type + Severity → Units to send</div></div><div class="pipeline-stage-status waiting" id="pss-6">waiting</div></div>
+        <div class="pipeline-stage-row" id="ps-7"><div class="pipeline-stage-icon">👮</div><div class="pipeline-stage-info"><div class="pipeline-stage-name">Operator Confirmation</div><div class="pipeline-stage-desc">Human validates &amp; authorizes dispatch</div></div><div class="pipeline-stage-status waiting" id="pss-7">waiting</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Results -->
+  <div class="right-panel">
+
+    <!-- Stage 2: Audio Denoiser Output -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🔊</span> Audio Denoiser Output</div>
+        <span class="card-badge">STAGE 2</span>
+      </div>
+
+      <div id="audio-placeholder" style="color:var(--text-muted);font-size:13px;padding:20px;text-align:center;">Process an emergency call to see waveforms and audio here.</div>
+
+      <div id="audio-results" style="display:none">
+        <div class="audio-panel-grid">
+          <div class="audio-track-box">
+            <div class="track-box-header">
+              <div class="track-box-title">📢 Original <span class="track-badge-noisy">NOISY</span></div>
+            </div>
+            <canvas class="waveform-canvas" id="waveform-raw"></canvas>
+            <audio id="audio-raw" controls></audio>
+          </div>
+          <div class="audio-track-box">
+            <div class="track-box-header">
+              <div class="track-box-title">✨ Denoised <span class="track-badge-clean">CLEAN</span></div>
+            </div>
+            <canvas class="waveform-canvas" id="waveform-denoised"></canvas>
+            <audio id="audio-denoised" controls></audio>
+          </div>
+        </div>
+        <div class="metrics-strip" id="metrics-strip">
+          <div class="metric-cell"><div class="metric-label">Raw SNR</div><div class="metric-val" id="met-raw-snr">—</div></div>
+          <div class="metric-cell"><div class="metric-label">Enhanced SNR</div><div class="metric-val highlight" id="met-enh-snr">—</div></div>
+          <div class="metric-cell"><div class="metric-label">Improvement</div><div class="metric-val highlight" id="met-snr-imp">—</div></div>
+          <div class="metric-cell"><div class="metric-label">Duration</div><div class="metric-val" id="met-dur">—</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3 & 4: ASR + Translation -->
+    <div class="card" id="card-transcripts" style="display:none">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🗣️</span> Speech Recognition &amp; Translation</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="lang-detect-chip" id="lang-detected-chip">—</span>
+          <span class="card-badge">STAGES 3–4</span>
+        </div>
+      </div>
+      <div class="transcripts-grid">
+        <div class="transcript-card">
+          <div class="transcript-header">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">🎙️ Native Transcript <span style="font-size:10px;opacity:0.6;">(Gnani ASR)</span></div>
+            <span id="asr-provider-badge" style="font-size:10px;color:var(--purple-accent);font-family:var(--font-mono);"></span>
+          </div>
+          <div class="transcript-box" id="transcript-native">—</div>
+        </div>
+        <div class="transcript-card">
+          <div class="transcript-header">
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);">🌐 English Translation</div>
+            <span id="trans-provider-badge" style="font-size:10px;color:var(--cyan-primary);font-family:var(--font-mono);"></span>
+          </div>
+          <div class="transcript-box" id="transcript-english">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 5: LLM Intelligence -->
+    <div class="card" id="card-llm" style="display:none">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🤖</span> LLM Emergency Intelligence</div>
+        <span class="card-badge">STAGE 5</span>
+      </div>
+
+      <div class="llm-hud-grid">
+        <!-- Threat Meter -->
+        <div class="threat-meter-card">
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;">EMERGENCY TYPE</div>
+          <div class="threat-type-badge critical" id="llm-type-badge">—</div>
+
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-top:8px;">SEVERITY SCORE</div>
+          <div class="threat-score-display">
+            <div class="threat-score-num" id="llm-score">—</div>
+            <div class="threat-score-denom">/5</div>
+          </div>
+          <div class="severity-bar">
+            <div class="severity-fill" id="llm-severity-fill" style="width:0%;background:linear-gradient(90deg,#ff2d55,#ff6b35)"></div>
+          </div>
+          <div class="threat-severity-label" id="llm-severity-label">—</div>
+
+          <div style="margin-top:10px;font-size:11px;color:var(--text-muted)">AI Confidence</div>
+          <div style="font-size:14px;font-weight:700;font-family:var(--font-mono);color:var(--cyan-primary)" id="llm-confidence">—</div>
+        </div>
+
+        <!-- Entities -->
+        <div>
+          <div class="entities-grid">
+            <div class="entity-pill-card"><div class="entity-pill-label">📍 Location</div><div class="entity-pill-val" id="llm-loc">—</div></div>
+            <div class="entity-pill-card"><div class="entity-pill-label">🏙️ City</div><div class="entity-pill-val" id="llm-city">—</div></div>
+            <div class="entity-pill-card"><div class="entity-pill-label">🏷️ Landmark</div><div class="entity-pill-val" id="llm-landmark">—</div></div>
+            <div class="entity-pill-card"><div class="entity-pill-label">🧍 Trapped</div><div class="entity-pill-val" id="llm-trapped">—</div></div>
+            <div class="entity-pill-card"><div class="entity-pill-label">🩹 Injured</div><div class="entity-pill-val" id="llm-injured">—</div></div>
+            <div class="entity-pill-card"><div class="entity-pill-label">⚠️ At Risk</div><div class="entity-pill-val" id="llm-at-risk">—</div></div>
+          </div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;">⚠️ Identified Hazards</div>
+          <div class="hazards-container" id="hazards-container">—</div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin:12px 0 6px;">📋 Tactical Summary</div>
+          <div class="summary-box" id="llm-summary">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 6: Dispatch Plan -->
+    <div class="card" id="card-dispatch" style="display:none">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🚒</span> Tactical Dispatch Plan</div>
+        <span class="card-badge">STAGE 6</span>
+      </div>
+
+      <div class="dispatch-plan-box">
+        <div class="dispatch-header-row">
+          <div class="dispatch-agency-primary" id="disp-agency">—</div>
+          <div class="dispatch-meta-chips">
+            <span class="meta-chip eta" id="disp-eta">ETA —min</span>
+            <span class="meta-chip radio" id="disp-radio">—</span>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;font-family:var(--font-mono)" id="disp-plan-id">—</div>
+        <div style="font-size:13px;font-weight:700;color:var(--red-emergency);margin-bottom:12px;" id="disp-priority">—</div>
+
+        <table class="units-table" id="units-table">
+          <thead>
+            <tr><th>Call Sign</th><th>Unit Type</th><th>Qty</th><th>Station</th></tr>
+          </thead>
+          <tbody id="units-tbody"></tbody>
+        </table>
+
+        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">🔧 Equipment Checklist</div>
+        <div class="equipment-tags" id="equipment-tags"></div>
+
+        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin:14px 0 8px;">📜 Critical SOPs</div>
+        <ul class="protocols-list" id="protocols-list"></ul>
+      </div>
+    </div>
+
+    <!-- Stage 7: Operator Confirmation Console -->
+    <div class="card" id="card-operator" style="display:none">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">👮</span> Human Operator Confirmation Console</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="operator-alert-badge">⚠️ AWAITING AUTHORIZATION</span>
+          <span class="card-badge">STAGE 7</span>
+        </div>
+      </div>
+
+      <div class="operator-console">
+        <div class="operator-console-header">
+          <div style="font-size:14px;font-weight:700;color:#fde047;">🛡️ Operator Override &amp; Dispatch Authorization</div>
+          <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">Call ID: <span id="op-call-id-display">—</span></div>
+        </div>
+
+        <div class="operator-form-grid">
+          <div class="form-group">
+            <label>Emergency Type</label>
+            <select id="op-type" class="form-select">
+              <option value="FLOOD">🌊 FLOOD</option>
+              <option value="FIRE">🔥 FIRE</option>
+              <option value="MEDICAL">🏥 MEDICAL</option>
+              <option value="BUILDING_COLLAPSE">🏚️ BUILDING COLLAPSE</option>
+              <option value="ROAD_ACCIDENT">🚗 ROAD ACCIDENT</option>
+              <option value="GAS_LEAK">☣️ GAS LEAK</option>
+              <option value="CRIME_VIOLENCE">🔫 CRIME / VIOLENCE</option>
+              <option value="OTHER">❓ OTHER</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Severity Level</label>
+            <select id="op-severity" class="form-select">
+              <option value="CRITICAL">🔴 CRITICAL</option>
+              <option value="HIGH">🟠 HIGH</option>
+              <option value="MEDIUM">🟡 MEDIUM</option>
+              <option value="LOW">🟢 LOW</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>People Count (Confirmed)</label>
+            <input type="number" id="op-people" class="form-input" value="0" min="0"/>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label>Confirmed Location</label>
+          <input type="text" id="op-location" class="form-input" placeholder="Confirm or correct location…"/>
+        </div>
+
+        <div class="form-group">
+          <label>Operator Notes / Override Reason</label>
+          <textarea id="op-notes" class="form-textarea" placeholder="Add tactical notes, corrections, or dispatch authorization memo…"></textarea>
+        </div>
+
+        <div class="operator-actions-bar">
+          <button class="btn-confirm-dispatch" onclick="confirmDispatch('DISPATCH')">
+            ✅ CONFIRM &amp; DISPATCH UNITS
+          </button>
+          <button class="btn-escalate" onclick="confirmDispatch('ESCALATE')">
+            🔺 ESCALATE
+          </button>
+          <button class="btn-reject" onclick="confirmDispatch('STANDBY')">
+            ⏸ STANDBY
+          </button>
+        </div>
+
+        <!-- Success banner after dispatch -->
+        <div class="dispatch-success-banner" id="dispatch-success-banner">
+          <div class="success-banner-content">
+            <div class="success-check-icon">✓</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--green-dispatch)">Units Dispatched Successfully!</div>
+              <div style="font-size:12px;color:var(--text-secondary)" id="dispatch-success-detail">—</div>
+            </div>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="dispatch-broadcast-code">—</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right-panel -->
+</div><!-- /main-container -->
+
+<!-- ========= INCIDENT LOG MODAL ========= -->
+<div class="modal-overlay" id="log-modal">
+  <div class="modal-card" style="width:800px;max-height:80vh;overflow:auto;">
+    <div class="modal-header">
+      <div class="card-title">📋 Incident Audit Log</div>
+      <button class="modal-close" onclick="document.getElementById('log-modal').classList.remove('active')">✕</button>
+    </div>
+    <table class="audit-table" id="audit-table">
+      <thead><tr><th>Call ID</th><th>Time</th><th>Language</th><th>Type</th><th>Severity</th><th>Location</th><th>Status</th></tr></thead>
+      <tbody id="audit-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========= API KEYS MODAL ========= -->
+<div class="modal-overlay" id="api-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="card-title">🔑 API Key Configuration</div>
+      <button class="modal-close" onclick="document.getElementById('api-modal').classList.remove('active')">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Override API keys for this session. Keys are pre-configured; leave blank to use defaults.</p>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);">Gnani.ai API Key</label>
+      <input type="text" id="modal-gnani-key" class="form-input" placeholder="Pre-configured ✓" style="font-family:var(--font-mono);font-size:12px;"/>
+    </div>
+    <div class="form-group" style="margin-bottom:16px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text-secondary);">Gemini API Key (for LLM)</label>
+      <input type="text" id="modal-gemini-key" class="form-input" placeholder="Optional — offline NLP used if blank"/>
+    </div>
+    <button class="btn-process" onclick="document.getElementById('api-modal').classList.remove('active')">Save &amp; Close</button>
+  </div>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
